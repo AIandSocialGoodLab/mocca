@@ -25,7 +25,6 @@ def create_actor_network(state_size, action_size):
     state_input = Input(shape=[state_size])
 
     #---------- relu -------
-    # ------- worked in submission -----
     # model = tf.keras.Sequential([
     #   state_input,
     #   tf.keras.layers.Dense(HIDDEN1_UNITS, activation=tf.nn.relu), 
