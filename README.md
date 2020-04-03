@@ -33,3 +33,6 @@ To run experiments,
 <code>
     python3 run_sac_multi.py
 </code>
+
+referneces:
+The sac code is modified from this implementation: https://github.com/openai/spinningup/tree/master/spinup/algos/tf1/sac
