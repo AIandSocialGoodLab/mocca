@@ -24,6 +24,12 @@ To run experiments,
 
 <code>
     python3 run_ddpg_single.py
+</code>
+
+<code>
     python3 run_sac_single.py
+</code>
+
+<code>
     python3 run_sac_multi.py
 </code>
