@@ -1,6 +1,6 @@
 import gym
 import envs
-from algo.ddpg import DDPG
+from algo_ddpg.ddpg import DDPG
 
 
 def main():
