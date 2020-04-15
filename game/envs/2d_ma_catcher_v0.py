@@ -28,6 +28,7 @@ class CatcherEnv(gym.Env):
 		self.att_action_space = gym.spaces.Box(low=np.array([-20,-20],dtype=np.float32), high=np.array([20,20],dtype=np.float32)) 
 
 		# attacker x, y
+		# ty: att_state is not updated!!
 		self.att_state = np.array([100,100], dtype=np.float32)
 
 		self.state = None
@@ -55,7 +56,7 @@ class CatcherEnv(gym.Env):
 		return np.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
 	def getAttState(self):
-		return self.att_state.copy()
+		return self.state[-2:].copy()
 
 	def _tanhOut2distance(self, out):
 
@@ -63,12 +64,20 @@ class CatcherEnv(gym.Env):
 		# https://stackoverflow.com/questions/929103/convert-a-number-range-to-another-range-maintaining-ratio
 		return (out + 1) * 40 / 2 + (-20)
 
-	def _isAtBoundary(self):
+	def _isDefAtBoundary(self):
 
 		if (self.state[0] == 0 or self.state[0] == 500 or
 			self.state[1] == 0 or self.state[1] == 500 or 
 			self.state[2] == 0 or self.state[2] == 500 or 
 			self.state[3] == 0 or self.state[3] == 500):
+			return True
+		else:
+			return False
+
+	def _isAttAtBoundary(self):
+
+		if (self.state[-2] == 0 or self.state[-2] == 500 or
+			self.state[-1] == 0 or self.state[-1] == 500):
 			return True
 		else:
 			return False
@@ -145,9 +154,9 @@ class CatcherEnv(gym.Env):
 		
 		
 		# compute distance metrics
-		defAttDist = self._compDist(self.state[0], self.state[1], self.att_state[0], self.att_state[1])
-		uavAttDist = self._compDist(self.state[2], self.state[3], self.att_state[0], self.att_state[1])
-		tarAttDist = self._compDist(self.state[5], self.state[6], self.att_state[0], self.att_state[1])
+		defAttDist = self._compDist(self.state[0], self.state[1], self.state[-2], self.state[-1])
+		uavAttDist = self._compDist(self.state[2], self.state[3], self.state[-2], self.state[-1])
+		tarAttDist = self._compDist(self.state[5], self.state[6], self.state[-2], self.state[-1])
 		# reward shaping
 		# tarDefDist = self._compDist(self.state[5], self.state[6], self.state[0], self.state[1])
 
@@ -155,8 +164,8 @@ class CatcherEnv(gym.Env):
 		# if uav found attacker
 		if uavAttDist < 10:
 			r = 0.0 # should not set this to be greater
-			self.state[2] = self.att_state[0]
-			self.state[3] = self.att_state[1]
+			self.state[2] = self.state[-2]
+			self.state[3] = self.state[-1]
 			self.state[4] = 1
 			
 
@@ -175,10 +184,14 @@ class CatcherEnv(gym.Env):
 			r = -10.0
 			done = True
 			info = {"done": "max steps reached"}
-		elif self._isAtBoundary():
+		elif self._isDefAtBoundary():
 			r = -10.0
 			done = True
-			info = {"done": "out of boundary"}
+			info = {"done": "def out of boundary"}
+		elif self._isAttAtBoundary():
+			r = 10.0
+			done = True
+			info = {"done": "att out of boundary"}
 		# elif tarDefDist < 10:
 		# 	r = 2.0
 		# 	done = False
@@ -189,6 +202,7 @@ class CatcherEnv(gym.Env):
 		# 	done = False
 		# 	info = {"done":None}
 		else:
+			# ty: this means a positive reward for attacker every time step, may not be reasonable
 			r = -0.5
 			done = False
 			info = {"done": None}

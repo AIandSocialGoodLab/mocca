@@ -155,6 +155,7 @@ class AttSacMeta():
         q_backup = tf.stop_gradient(self.r_ph + gamma*(1-self.d_ph)*(min_q_targ - alpha * self.logp_pi_next))
 
         # Soft actor-critic losses
+        # todo: there's additional alpha, but shouldnt affact since it's constant
         pi_loss = tf.reduce_mean(alpha * self.logp_pi - alpha - min_q_pi)
         q1_loss = 0.5 * tf.reduce_mean((q_backup - self.q1)**2)
         q2_loss = 0.5 * tf.reduce_mean((q_backup - self.q2)**2)
@@ -187,6 +188,8 @@ class AttSacMeta():
         # Initializing targets to match main variables
         self.target_init = tf.group([tf.assign(v_targ, v_main)
                                   for v_main, v_targ in zip(get_vars('att'), get_vars('att_target'))])
+
+        
 
 
     def set_session(self, sess):

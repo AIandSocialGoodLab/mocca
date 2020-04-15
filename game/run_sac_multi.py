@@ -56,6 +56,8 @@ def sacMeta(args):
 
     # initialize tf session
 
+    load_pretrained_attacker = True
+
     seed = 0
     tf.set_random_seed(0)
     np.random.seed(0)
@@ -82,13 +84,36 @@ def sacMeta(args):
 
     defender.set_session(sess)
     attacker.set_session(sess)
-
+    
+    if load_pretrained_attacker:
+        saver = tf.train.Saver()
+        # ty: this currently not working -> try store all variables
+        saver.restore(sess, './model/attacker_pretrain')
 
     steps_per_epoch=4000
     epochs=100
     total_steps = steps_per_epoch * epochs
 
     o_all, ep_ret, ep_len = env.reset(), 0, 0
+
+    def get_reward(info, r):
+        if info["done"] == None:
+            def_r = r
+            att_r = r
+        elif "max steps reached" in info["done"]:
+            def_r = r
+            att_r = r
+        elif "def out of boundary" in info["done"]:
+            def_r = r
+            att_r = 0
+        elif "att out of boundary" in info["done"]:
+            def_r = 0
+            att_r = -(r+100) # note the difference
+        else:
+            # attacker caught or target attacked
+            def_r = r
+            att_r = -r
+        return (def_r, att_r)
 
     for t in range(total_steps):
 
@@ -97,11 +122,14 @@ def sacMeta(args):
         # get att action
         a_att = attacker.act(getAttObs(o_all), t)
 
-        o_all2, r, d, _ = env.step(np.append(a_def, a_att))
+        # todo: change attacker reward for out of boundary
+        o_all2, r, d, info = env.step(np.append(a_def, a_att))
 
-        defender.train(getDefObs(o_all), a_def, r, getDefObs(o_all2), d, t, a_att)
+        def_r,att_r = get_reward(info, r)
 
-        attacker.train(getAttObs(o_all), a_att, -r, getAttObs(o_all2), d, t, a_def)
+        defender.train(getDefObs(o_all), a_def, def_r, getDefObs(o_all2), d, t, a_att)
+
+        attacker.train(getAttObs(o_all), a_att, att_r, getAttObs(o_all2), d, t, a_def)
 
         ep_ret += r
         ep_len += 1
