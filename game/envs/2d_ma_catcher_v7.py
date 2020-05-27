@@ -75,6 +75,8 @@ class CatcherEnv(gym.Env):
 
 		self.stage = 0
 
+		self.randDefLoc = False
+
 
 
 
@@ -99,11 +101,11 @@ class CatcherEnv(gym.Env):
 		# 2 3 4th argument was for uav, no uav now, just set to 1
 		# return np.array([250,250,1,1,1])
 
-		# defState = self.def_observation_space.sample()[:2]
-		
-		# return defState
-
-		return np.array([250,250])
+		if self.randDefLoc:
+			defState = self.def_observation_space.sample()[:2]
+			return defState
+		else:
+			return np.array([250,250])
 
 
 	def _initTarget(self):

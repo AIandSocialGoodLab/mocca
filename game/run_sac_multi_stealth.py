@@ -123,14 +123,6 @@ def sacMeta(args):
                 return np.array([0.0,0.0])
         return a_att
 
-    def a_def_fix(a_def, env):
-        for i in range(env.num_target):
-            tarX, tarY = env.tarPoss[i]
-            defX, defY = env.state[:2]
-            if env._compDist(defX, defY, tarX, tarY) < 15.0:
-                return np.array([0.0,0.0])
-        return a_def
-
     def a_def_residual(a_def, env, o_all):
 
         return a_def + obs2mu(env.getDefObs(o_all)) 
@@ -146,8 +138,6 @@ def sacMeta(args):
 
         # ty: hardcoding a_att to ensure attacker get enough rewards
         a_att = a_att_fix(a_att, env)
-
-        # a_def = a_def_fix(a_def, env)
 
         # a_def = a_def_residual(a_def, env, o_all)
 
@@ -186,6 +176,7 @@ def sacMeta(args):
                 state = test_env.reset()
 
                 s_t = np.array(state)
+
                 total_reward = 0.0
                 d = False
                 step = 0
@@ -199,16 +190,12 @@ def sacMeta(args):
 
                     a_att_test = a_att_fix(a_att_test, test_env)
 
-                    # a_def_test = a_def_fix(a_def_test, env)
-
                     # a_def_test = a_def_residual(a_def_test, env, state)
 
                     # a_def_test *= 2
                     
-                    # ty: TODO add get_reward here
                     o_all2_test, (r_def_test,r_att_test), d, info = test_env.step(np.append(a_def_test, a_att_test))
 
-                    # new_s = np.array(o_all2_test)
                     total_reward += r_def_test
                     state = o_all2_test
 

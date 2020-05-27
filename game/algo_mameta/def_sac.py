@@ -11,7 +11,7 @@ from spinup.utils.logx import EpochLogger
 import envs
 
 # may not need abstract game sicne we are using cycle reward shaping
-from abstractGameLP.createGraph import *
+from abstractGameLP.createGraph_hard import *
 # from abstractGameLP.createGraph_v2 import *
 
 # must be in the same directory
@@ -83,13 +83,13 @@ class CentralizeReplayBuffer:
 class DefSacMeta():
 
     def __init__(self, env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
-                 replay_size=int(1e6), gamma=0.99, polyak=0.995, lr=1e-3, alpha=0.2,
+                 replay_size=int(1e6), gamma=0.99, polyak=0.995, lr=1e-3, alpha=0.0001,
                  batch_size=100, start_steps=10000, update_after=1000, update_every=50,
                  num_test_episodes=10, max_ep_len=1000, logger_kwargs=dict(), save_freq=1, centralizeQ=False):
 
         
         # flag of whether using meta stratey 0: False; 1: True
-        self.m = 0
+        self.m = 1
         
         self.start_steps = start_steps
         self.update_after = update_after

@@ -59,7 +59,7 @@ register(
 
 register(
     id='MultiAgent-Catcher2DTest-v7',
-    entry_point='envs.2d_ma_catcher_v7:CatcherEnv'
+    entry_point='envs.2d_ma_catcher_v7_test:CatcherEnv'
 )
 
 register(

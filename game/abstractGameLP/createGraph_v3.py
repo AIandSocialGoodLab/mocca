@@ -121,7 +121,7 @@ for i in range(0, numNodes):
 		curSum += x[i][j]
 constr.append(curSum == 1)
 
-# sum of in flow is equal to sum of out flow: should not: since there are self loops
+# sum of in flow is equal to sum of out flow: this is automatically fulfilled
 # for i in range(0, numNodes):
 # 	inFlow = 0
 # 	outFlow = 0

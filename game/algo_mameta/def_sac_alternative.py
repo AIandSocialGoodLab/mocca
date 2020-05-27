@@ -14,7 +14,7 @@ import envs
 # from abstractGameLP.createGraph import *
 # from abstractGameLP.createGraph_v2 import *
 
-# from abstractGameLP.createGraph_v3 import *
+from abstractGameLP.createGraph_v3 import *
 
 # must be in the same directory
 
