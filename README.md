@@ -18,6 +18,12 @@ game/algo_mameta/def_sac_alternative - same as def_sac but with standard deviati
 
 game/algo_sac - sac implementation for defender
 
+game/abstractGameLP/createGraph_v3 - LP meta strategy
+
+game/abstractGameLP/createGraph_v2 - deprecated
+
+game/abstractGameLP/createGraph - deprecated
+
 game/data - experiments results
 
 game/model - trained model
@@ -39,6 +45,13 @@ game/envs/2d_ma_catcher_v8_test - testing environment for CycleMeta
 run_sac_multi_stealth.py
 >centralizedQ: whether using centralized Q function
 
+def_sac_alternative.py
+>alpha: weight of regulator (if set to 0 becomes ddpg)
+>self.m: flag of whether using meta strategy
+>gamma: discount factor
+>polyak: soft update weight
+>lr: learning rate
+>batch_size: size of 
 
 To run experiments, 
     python3 run_sac_multi_stealth.py
