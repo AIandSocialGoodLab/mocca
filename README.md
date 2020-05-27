@@ -1,6 +1,6 @@
 # mocca
 
-This repo contains the experiments for defender, attacker modeling.
+#Files:
 
 game/run_ddpg_single.py - driver of ddpg algorithm (only defender is trained)
 
@@ -34,21 +34,13 @@ game/envs/2d_ma_catcher_v8 - contains reward shaping for CycleMeta
 
 game/envs/2d_ma_catcher_v8_test - testing environment for CycleMeta
 
+#Key variables:
+
 
 
 To run experiments, 
+    python3 run_sac_multi_stealth.py
 
-<code>
-    python3 run_ddpg_single.py
-</code>
-
-<code>
-    python3 run_sac_single.py
-</code>
-
-<code>
-    python3 run_sac_multi.py
-</code>
 
 referneces:
 The sac code is modified from this implementation: https://github.com/openai/spinningup/tree/master/spinup/algos/tf1/sac
