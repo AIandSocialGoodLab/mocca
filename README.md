@@ -54,6 +54,9 @@ def_sac_alternative.py
 >batch_size: size of batch<br/>
 >start_steps: stop random actions after start_steps
 
+2d_ma_catcher_v7.py
+>self.randDefLoc: whether defender's initial location is fixed
+
 To run experiments, 
 >python3 run_sac_multi_stealth.py
 
