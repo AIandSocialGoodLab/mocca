@@ -1,6 +1,6 @@
 # mocca
 
-This repo contains the experiments for defender, attacker, uav modeling.
+This repo contains the experiments for defender, attacker modeling.
 
 game/run_ddpg_single.py - driver of ddpg algorithm (only defender is trained)
 
@@ -11,6 +11,8 @@ game/run_sac_multi.py - driver of multiagent sac algorithm (both attacker and de
 game/algo_ddpg - ddpg implementation for defender
 
 game/algo_mameta  - multiagent sac implementation of defender and attacker
+
+    game/algo_mameta/def_sac_alternative
 
 game/algo_sac - sac implementation for defender
 
