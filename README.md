@@ -46,12 +46,12 @@ run_sac_multi_stealth.py
 >centralizedQ: whether using centralized Q function
 
 def_sac_alternative.py
->alpha: weight of regulator (if set to 0 becomes ddpg)
->self.m: flag of whether using meta strategy
->gamma: discount factor
->polyak: soft update weight
->lr: learning rate
->batch_size: size of 
+>alpha: weight of regulator (if set to 0 becomes ddpg)<br/>
+>self.m: flag of whether using meta strategy<br/>
+>gamma: discount factor<br/>
+>polyak: soft update weight<br/>
+>lr: learning rate<br/>
+>batch_size: size of <br/>
 
 To run experiments, 
     python3 run_sac_multi_stealth.py
