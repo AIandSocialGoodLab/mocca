@@ -51,10 +51,11 @@ def_sac_alternative.py
 >gamma: discount factor<br/>
 >polyak: soft update weight<br/>
 >lr: learning rate<br/>
->batch_size: size of <br/>
+>batch_size: size of batch<br/>
+>start_steps: stop random actions after start_steps
 
 To run experiments, 
-    python3 run_sac_multi_stealth.py
+>python3 run_sac_multi_stealth.py
 
 
 referneces:
