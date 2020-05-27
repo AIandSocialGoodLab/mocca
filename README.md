@@ -36,7 +36,7 @@ game/envs/2d_ma_catcher_v8_test - testing environment for CycleMeta
 
 # key variables:
 
-run_sac_multi_stealth.py:
+run_sac_multi_stealth.py
     centralizedQ: whether using centralized Q function
 
 
