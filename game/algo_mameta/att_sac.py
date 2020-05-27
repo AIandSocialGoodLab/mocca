@@ -10,7 +10,7 @@ from spinup.utils.logx import EpochLogger
 
 import envs
 
-from abstractGameLP.createGraph import *
+# from abstractGameLP.createGraph import *
 
 # must be in the same directory
 
@@ -84,7 +84,7 @@ class AttSacMeta():
     def __init__(self, env_fn, actor_critic=core.mlp_actor_critic, ac_kwargs=dict(), seed=0,
                  replay_size=int(1e6), gamma=0.99, polyak=0.995, lr=1e-3, alpha=0.2,
                  batch_size=100, start_steps=10000, update_after=1000, update_every=50,
-                 num_test_episodes=10, max_ep_len=1000, logger_kwargs=dict(), save_freq=1, centralizeQ=False):
+                 num_test_episodes=10, max_ep_len=1000, logger_kwargs=dict(), save_freq=1, centralizeQ=False, player='att'):
 
         # ty: may set seed at upper code
         
@@ -109,7 +109,7 @@ class AttSacMeta():
         ac_kwargs['oa'] = self.oa_ph
 
         # Main outputs from computation graph
-        with tf.variable_scope('att'):
+        with tf.variable_scope(player):
             self.mu, self.pi, self.logp_pi, self.q1, self.q2 = actor_critic(self.x_ph, self.a_ph, **ac_kwargs)
 
             # ty: placeholder to hold meta strategy param TODO: check meta_log_std dimension
@@ -123,7 +123,7 @@ class AttSacMeta():
             # self.logp_phi = core.gaussian_likelihood(self.a_ph, self.meta_mu, self.meta_log_std)
             # _, _, self.logp_phi = core.apply_squashing_func(self.meta_mu, self.a_ph, self.logp_phi)
 
-        with tf.variable_scope('att', reuse=True):
+        with tf.variable_scope(player, reuse=True):
             # compose q with pi, for pi-learning
             _, _, _, self.q1_pi, self.q2_pi = actor_critic(self.x_ph, self.pi, **ac_kwargs)
 
@@ -136,7 +136,7 @@ class AttSacMeta():
 
 
          # Target value network
-        with tf.variable_scope('att_target'):
+        with tf.variable_scope(player+"_target"):
             # target q values, using actions from *current* policy
             _, _, _, self.q1_targ, self.q2_targ  = actor_critic(self.x2_ph, self.pi_next, **ac_kwargs)
 
@@ -145,7 +145,7 @@ class AttSacMeta():
 
 
         # Count variables
-        var_counts = tuple(core.count_vars(scope) for scope in ['att/pi', 'att/q1', 'att/q2', 'att'])
+        var_counts = tuple(core.count_vars(scope) for scope in [player+'/pi', player+'/q1', player+'/q2', player])
         print('\nNumber of parameters: \t pi: %d, \t q1: %d, \t q2: %d, \t total: %d\n'%var_counts)
 
 
@@ -164,13 +164,13 @@ class AttSacMeta():
         # Policy train op 
         # (has to be separate from value train op, because q1_pi appears in pi_loss)
         pi_optimizer = tf.train.AdamOptimizer(learning_rate=lr)
-        self.train_pi_op = pi_optimizer.minimize(pi_loss, var_list=get_vars('att/pi'))
+        self.train_pi_op = pi_optimizer.minimize(pi_loss, var_list=get_vars(player+'/pi'))
 
 
         # Value train op
         # (control dep of train_pi_op because sess.run otherwise evaluates in nondeterministic order)
         value_optimizer = tf.train.AdamOptimizer(learning_rate=lr)
-        value_params = get_vars('att/q')
+        value_params = get_vars(player+'/q')
         with tf.control_dependencies([self.train_pi_op]):
             self.train_value_op = value_optimizer.minimize(value_loss, var_list=value_params)
 
@@ -178,7 +178,7 @@ class AttSacMeta():
         # (control flow because sess.run otherwise evaluates in nondeterministic order)
         with tf.control_dependencies([self.train_value_op]):
             self.target_update = tf.group([tf.assign(v_targ, polyak*v_targ + (1-polyak)*v_main)
-                                      for v_main, v_targ in zip(get_vars('att'), get_vars('att_target'))])
+                                      for v_main, v_targ in zip(get_vars(player), get_vars(player+"_target"))])
 
 
         # All ops to call during one training step
@@ -187,7 +187,7 @@ class AttSacMeta():
 
         # Initializing targets to match main variables
         self.target_init = tf.group([tf.assign(v_targ, v_main)
-                                  for v_main, v_targ in zip(get_vars('att'), get_vars('att_target'))])
+                                  for v_main, v_targ in zip(get_vars(player), get_vars(player+"_target"))])
 
         
 

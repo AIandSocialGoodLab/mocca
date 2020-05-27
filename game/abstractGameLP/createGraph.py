@@ -1,10 +1,18 @@
 import numpy as np
 import cvxpy as cp
 
+print("using createGraph_v1")
+
+"""
+explanation for non 1 stationary prob -> multiple solutions, not the one we expect
+"""
+
 numNodes = 9
 
 edgeList = [(0,1), (1,2), (3,4), (4,5), (6,7), (7,8),
-			(0,3), (3,6), (1,4), (4,7), (2,5), (5,8)]
+			(0,3), (3,6), (1,4), (4,7), (2,5), (5,8),
+			(0,0), (1,1), (2,2), (3,3), (4,4), (5,5),
+			(6,6),( 7,7), (8,8)]
 
 discretLevels = 6
 
@@ -18,20 +26,52 @@ def createGraphMatrix(numNodes, edgeList):
 
 	return G
 
+# def assignNodeReward(numNodes):
+
+# 	r = np.zeros(numNodes)
+# 	r[0] = 1
+# 	r[1] = 1
+# 	r[2] = 1
+# 	r[3] = 1
+# 	r[4] = 100
+# 	r[5] = 1
+# 	r[6] = 0
+# 	r[7] = 1
+# 	r[8] = 1
+
+# 	return r
+
+# def assignNodeReward(numNodes):
+
+# 	r = np.zeros(numNodes)
+# 	r[0] = 0
+# 	r[1] = 0
+# 	r[2] = 0
+# 	r[3] = 0
+# 	r[4] = 0
+# 	r[5] = 0
+# 	r[6] = 0
+# 	r[7] = 0
+# 	r[8] = 10
+
+# 	return r
+
+
 def assignNodeReward(numNodes):
 
 	r = np.zeros(numNodes)
-	r[0] = 1
-	r[1] = 1
-	r[2] = 1
-	r[3] = 1
-	r[4] = 100
-	r[5] = 1
+	r[0] = 0
+	r[1] = 15
+	r[2] = 0
+	r[3] = 10
+	r[4] = 0
+	r[5] = 0
 	r[6] = 0
-	r[7] = 1
-	r[8] = 1
+	r[7] = 0
+	r[8] = 20
 
 	return r
+
 
 p = np.arange(discretLevels) * (1.0/(discretLevels-1))
 
@@ -197,16 +237,22 @@ def node2mu(nodeid, numNodes, cs, actdim):
 			downProb += p[l] * d[nodeid][nodeid+cs][l].value
 
 	leftProb = 0
-	if (nodeid - 1) in range(0, numNodes):
+	if (nodeid - 1) in range(0, numNodes) and (nodeid % cs != 0):
 		for l in range(discretLevels):
-			downProb += p[l] * d[nodeid][nodeid-1][l].value
+			leftProb += p[l] * d[nodeid][nodeid-1][l].value
 
 	rightProb = 0
-	if (nodeid + 1) in range(0, numNodes):
+	if (nodeid + 1) in range(0, numNodes) and ((nodeid+1)%cs != 0):
 		for l in range(discretLevels):
-			downProb += p[l] * d[nodeid][nodeid+1][l].value
+			rightProb += p[l] * d[nodeid][nodeid+1][l].value
 
-	plist = [upProb, downProb, leftProb, rightProb]
+	stayProb = 0
+	if (nodeid) in range(0, numNodes):
+		for l in range(discretLevels):
+			rightProb += p[l] * d[nodeid][nodeid][l].value
+
+
+	plist = [upProb, downProb, leftProb, rightProb, stayProb]
 
 	optidx = np.argmax(plist)
 
@@ -217,8 +263,10 @@ def node2mu(nodeid, numNodes, cs, actdim):
 		return np.array([0, actdim])
 	elif optidx == 2:
 		return np.array([-actdim, 0])
+	elif optidx == 3:
+		return np.array([actdim, 0])
 	else:
-		return np.array([0, actdim])
+		return np.array([0,0])
 
 
 def getNode2muDict(numNodes, cs, actdim):
@@ -242,14 +290,64 @@ def pos2mu(x,y):
 
 	return node2muDict[nodeid]
 
-def obs2mu(o):
+def obs2mu(o, isUAV=False):
 
 	x = o[0]
 	y = o[1]
 
-	return np.append(pos2mu(x,y),[0,0])
+	if not isUAV:
+		return pos2mu(x,y)
+	else:
+		return np.append(pos2mu(x,y),[0,0])
+	
+
+def obs2pi(o, isUAV = False):
+
+	x = o[0]
+	y = o[1]
+
+	x = np.minimum(x,X)
+	y = np.minimum(y,Y)
+
+	nodeid = int(pos2node(x, y))
+	
+	upProb = 0
+	if (nodeid - cs)  in range(0, numNodes):
+		for l in range(discretLevels):
+			upProb += p[l] * d[nodeid][nodeid-cs][l].value
+
+	downProb = 0
+	if (nodeid + cs) in range(0, numNodes):
+		for l in range(discretLevels):
+			downProb += p[l] * d[nodeid][nodeid+cs][l].value
+
+	leftProb = 0
+	if (nodeid - 1) in range(0, numNodes):
+		for l in range(discretLevels):
+			leftProb += p[l] * d[nodeid][nodeid-1][l].value
+
+	rightProb = 0
+	if (nodeid + 1) in range(0, numNodes):
+		for l in range(discretLevels):
+			rightProb += p[l] * d[nodeid][nodeid+1][l].value
+
+	stayProb = 0
+	if (nodeid) in range(0, numNodes):
+		for l in range(discretLevels):
+			rightProb += p[l] * d[nodeid][nodeid][l].value
 
 
+	plist = [upProb, downProb, leftProb, rightProb, stayProb]
+	actlist = [np.array([0,-actdim]), np.array([0, actdim]), 
+			   np.array([-actdim, 0]), np.array([actdim, 0]), 
+			   np.array([0,0])]
+
+	aidx = np.random.choice([0,1,2,3,4],1, plist)[0]
+
+	if not isUAV:
+		return actlist[aidx]
+	else:
+		return np.append(actlist[aidx],[0,0])
 
 
 

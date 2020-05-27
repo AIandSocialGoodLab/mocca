@@ -69,7 +69,9 @@ class CatcherEnv(gym.Env):
 
 		# TODO: hard code the new range, fix this
 		# https://stackoverflow.com/questions/929103/convert-a-number-range-to-another-range-maintaining-ratio
-		return (out + 1) * 40 / 2 + (-20)
+		# return (out + 1) * 40 / 2 + (-20)
+		# ty: tanh no longer output
+		return out
 
 	def _isAtBoundary(self):
 
@@ -100,11 +102,6 @@ class CatcherEnv(gym.Env):
 			else:
 				self.att_state[1] = np.clip(self.att_state[1] + 20, 0, 500)
 				self.att_up_steps += 1
-
-
-	def step(self, actions):
-
-		self.num_steps += 1
 
 
 
