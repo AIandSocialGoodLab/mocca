@@ -1,6 +1,6 @@
 # mocca
 
-# Files:
+# files:
 
 game/run_ddpg_single.py - driver of ddpg algorithm (only defender is trained)
 
@@ -34,8 +34,10 @@ game/envs/2d_ma_catcher_v8 - contains reward shaping for CycleMeta
 
 game/envs/2d_ma_catcher_v8_test - testing environment for CycleMeta
 
-# Key variables:
+# key variables:
 
+run_sac_multi_stealth.py:
+    centralizedQ: whether using centralized Q function
 
 
 To run experiments, 
